@@ -17,11 +17,11 @@ public class Vision extends SubsystemBase {
   NetworkTableEntry ta;
   /** Creates a new Vision. */
   public Vision() {
-    table = NetworkTableInstance.getDefault().getTable("limelight");
-    tv = table.getEntry("tv");
-    tx = table.getEntry("tx");
-    ty = table.getEntry("ty");
-    ta = table.getEntry("ta");
+    table = NetworkTableInstance.getDefault().getTable("photonvision").getSubTable("gloworm");
+    tv = table.getEntry("hasTarget");
+    tx = table.getEntry("targetYaw");
+    ty = table.getEntry("targetPitch");
+    ta = table.getEntry("targetArea");
   }
 
 
@@ -32,8 +32,9 @@ public class Vision extends SubsystemBase {
   public double targetXAngle() {
     if(validTarget()) {
       return tx.getDouble(198);
+    }else{
+     return 180;
     }
-    return 180;
   }
   public double targetYAngle() {
     if(validTarget()) {
@@ -44,6 +45,7 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    //System.out.println(targetXAngle());
+    System.out.println(validTarget());
   }
 }

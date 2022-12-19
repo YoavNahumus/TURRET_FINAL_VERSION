@@ -26,7 +26,7 @@ public final class Constants {
     public static final double OUR_ALLIACNE_X = -1;
     public static final double OUR_ALLIANCE_Y = -1;
     public static final int PULSE_PER_DEGREE = 261260 / 360;
-    public static final int SENSOR_CLOCKWISE = 0;
+    public static final int SENSOR_CLOCKWISE = 1;
     public static final int SENSOR_COUNTER_CLOCKWISE = 0;
     public static final int MOTION_RANGE = 190;
     public static final double SENSOR_ACIVATE_VALUE = -1;

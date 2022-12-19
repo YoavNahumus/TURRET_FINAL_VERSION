@@ -35,15 +35,12 @@ public class RobotContainer {
     // Configure the button bindings
     joystick = new Joystick(Constants.JOYSTICK_ID);
     turret = new Turret(this);
-    Turret turretSubsystem = new Turret(this);
      find = new FindFF(turret);
     Shuffleboard.getTab("FIND").add(find);
-    Shuffleboard.getTab("title").add(turretSubsystem);
     configureButtonBindings();
-    //turret.setDefaultCommand(new VisionRotate(turret, vis));
+    Vision vision = new Vision();
+    turret.setDefaultCommand(new VisionRotate(turret, vis));
     //turret.setDefaultCommand(new ControlWithJoystick(turret, joystick));
-    turret.setDefaultCommand(new Calibration(turret));
-
   }
 
    
@@ -70,9 +67,6 @@ public class RobotContainer {
 
    
   public Command getAutonomousCommand() {
-    //FindFF findff = new FindFF(turret);
-   //DistancePID pid = new DistancePID(turret, -180);
-    
-    return null ;
+    return new Calibration(turret);
   }
 }

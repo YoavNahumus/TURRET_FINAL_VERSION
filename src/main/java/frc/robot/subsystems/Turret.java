@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -66,6 +67,14 @@ public class Turret extends SubsystemBase {
     motor.setSelectedSensorPosition(enc);
   }
 
+  public void setIsBrake(boolean brake){
+    if(brake){
+      motor.setNeutralMode(NeutralMode.Brake);
+    }else{
+      motor.setNeutralMode(NeutralMode.Coast);
+    }
+  }
+
   public void setAngle(double angle) { //gets optimized angle
     targetAngle = angle;
     double error = angle - getAngle();
@@ -120,7 +129,7 @@ public class Turret extends SubsystemBase {
 
   // TODO BETTER NAMES FOR SENSOR GETTERS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   public boolean getSensorClockWise() {
-    return sensor1.get();
+    return !sensor1.get();
   }
 
   public boolean getSensorCounterClockWise() {
