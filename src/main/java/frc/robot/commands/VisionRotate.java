@@ -4,7 +4,9 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Vision;
 
@@ -13,12 +15,16 @@ public class VisionRotate extends CommandBase {
   Turret turret;
   Vision vision;
   double sp = 0;
+  private double tempAngleForOptimize = 0;
+  boolean goAround = false;
   public VisionRotate(Turret turret, Vision vision) {
     this.turret = turret;
     this.vision = vision;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(turret);
   }
+
+
 
   // Called when the command is initially scheduled.
   @Override
@@ -28,12 +34,52 @@ public class VisionRotate extends CommandBase {
   @Override
   public void execute() {
     if (vision.validTarget()){
-      sp = turret.getAngle() + vision.targetXAngle();
+      sp = turret.getAngle() + vision.targetXAngle()-turret.getAngle()%0.1;
     }
-   // System.out.println(sp);
-    System.out.println(vision.validTarget());
+    sp = optimizeAngleForVision(sp);
+    if(!goAround){
+      turret.setAngle(sp);
+    }
+  }
+  
+  public void setGoAround(boolean e){
+    System.out.println("Change");
+    goAround = e;
+  }
 
-    turret.setAngle(turret.optimizeAngle(sp));
+
+  public double optimizeAngleForVision(double wantedAngle) {
+    double currentAngle = turret.getAngle();
+    if (wantedAngle > 180)
+      wantedAngle -= 360;
+    else if (wantedAngle < -180)
+      wantedAngle += 360;
+
+      double diff = wantedAngle - turret.getAngle();
+    if (currentAngle + diff > Constants.MOTION_RANGE) {
+      System.out.println("BIGGET ++++++++");
+      diff -= 360;
+      setGoAround(true); 
+      tempAngleForOptimize = turret.getAngle();
+    }
+    if (currentAngle + diff < -Constants.MOTION_RANGE) {
+      System.out.println("BIGGER --------");
+      diff += 360;
+      setGoAround(true); 
+      tempAngleForOptimize = turret.getAngle();
+    }
+
+    if (getGoAround()) {
+      if (Math.abs(tempAngleForOptimize - turret.getAngle()) > 180) {
+        setGoAround(false); 
+        tempAngleForOptimize = 0;
+      }
+    }
+    return diff + currentAngle;
+  }
+
+  public boolean getGoAround(){
+    return goAround;
   }
 
 
@@ -45,5 +91,16 @@ public class VisionRotate extends CommandBase {
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+
+  public double getError(){
+    return (sp-turret.getAngle());
+  }
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    // TODO Auto-generated method stub
+    super.initSendable(builder);
+    builder.addDoubleProperty("ERROR", this::getError, null);
   }
 }

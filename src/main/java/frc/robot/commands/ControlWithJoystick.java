@@ -33,7 +33,8 @@ public class ControlWithJoystick extends CommandBase {
    // angle += Math.pow(3, joystick.getY());
    angle += joystick.getY()*3;
    double a = angle; 
-   angle = turret.optimizeAngle(angle);
+   boolean r = false;
+  // angle = turret.optimizeAngle(angle, r );
    System.out.println("a= " + a + " opt= " + angle + " cur= " + turret.getAngle());
     //System.out.println("---------------------------------------------");
     turret.setAngle(angle);

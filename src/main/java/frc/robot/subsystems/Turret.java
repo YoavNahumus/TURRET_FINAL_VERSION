@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.concurrent.Callable;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -18,13 +20,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.commands.AimToXY;
+import frc.robot.commands.OdometryAim;
+import frc.robot.commands.VisionRotate;
 import frc.robot.util.Utilities;
 
 public class Turret extends SubsystemBase {
   private final TalonFX motor;
-  private AimToXY aimToBasket;
-  private AimToXY aimToOurAlliance;
+  private OdometryAim aimToBasket;
+  private OdometryAim aimToOurAlliance;
   private double kpValue = Constants.TURRET_MOTOR_KP;
   private double testTarget;
   private final Translation2d basketXY = new Translation2d(Constants.TARGET_X, Constants.TARGET_Y);
@@ -33,7 +36,9 @@ public class Turret extends SubsystemBase {
   private double targetAngle = 0;
   private double ffsearch;
   private double ffsearch2;
-  private DigitalInput sensor1; 
+  private DigitalInput sensor1;
+  private double tempAngleForOptimize = 0;
+
 
   public enum TurretMode {
     FOLLOW, SIDE, STOP
@@ -46,8 +51,8 @@ public class Turret extends SubsystemBase {
   /** Creates a new turret. */
   public Turret(RobotContainer robotContainer) {
     super();
-    aimToBasket = new AimToXY(this, basketXY);
-    aimToOurAlliance = new AimToXY(this, ourAllianceXY);
+    aimToBasket = new OdometryAim(this, basketXY);
+    aimToOurAlliance = new OdometryAim(this, ourAllianceXY);
     utilities = new Utilities();
     this.robotContainer = robotContainer;
     sensor1 = new DigitalInput(Constants.SENSOR_CLOCKWISE);
@@ -56,36 +61,36 @@ public class Turret extends SubsystemBase {
     ffsearch = 0.1;
     // TODO - init motor - brake, PID, ....
     motor.setSelectedSensorPosition(0);
-    //motor.setInverted(InvertType.InvertMotorOutput);
+    // motor.setInverted(InvertType.InvertMotorOutput);
   }
 
   public void setPower(double power) {
     motor.set(ControlMode.PercentOutput, power);
   }
 
-  public void setEncoder(double enc){
+  public void setEncoder(double enc) {
     motor.setSelectedSensorPosition(enc);
   }
 
-  public void setIsBrake(boolean brake){
-    if(brake){
+  public void setIsBrake(boolean brake) {
+    if (brake) {
       motor.setNeutralMode(NeutralMode.Brake);
-    }else{
+    } else {
       motor.setNeutralMode(NeutralMode.Coast);
     }
   }
 
-  public void setAngle(double angle) { //gets optimized angle
+  public void setAngle(double angle) { // gets optimized angle
     targetAngle = angle;
     double error = angle - getAngle();
     ff = Constants.FF_VALUE;
-    if(Math.abs(error) < 0.06) {
+    if (Math.abs(error) < 0.06) {
       ff = 0;
-    } else if(error < 0) {
+    } else if (error < 0) {
       ff = -ff;
     }
-     motor.set(ControlMode.Position, (int) (angle * Constants.PULSE_PER_DEGREE), DemandType.ArbitraryFeedForward, ff);
-    }
+    motor.set(ControlMode.Position, (int) (angle * Constants.PULSE_PER_DEGREE), DemandType.ArbitraryFeedForward, ff);
+  }
 
   public void setSensorPositionAngle(double angle) {
     motor.setSelectedSensorPosition(angle * Constants.PULSE_PER_DEGREE);
@@ -95,18 +100,49 @@ public class Turret extends SubsystemBase {
     return motor.getSelectedSensorPosition() / Constants.PULSE_PER_DEGREE;
   }
 
-  public double getEncoder(){
+  public double getEncoder() {
     return motor.getSelectedSensorPosition();
   }
 
-  public double getFF(){
+  public double getFF() {
     return ff;
   }
 
-  public double getOptimizedAngle(){
+  public double getOptimizedAngle() {
     return targetAngle;
   }
-  // TODO move to utilities 
+
+  // TODO move to utilities
+ /* public double optimizeAngle(double wantedAngle, VisionRotate visionRotate) {
+    double currentAngle = getAngle(), diff = wantedAngle - getAngle();
+    if (wantedAngle > 180)
+      diff -= 360;
+    else if (wantedAngle < -180)
+      diff += 360;
+
+    if (currentAngle + diff > Constants.MOTION_RANGE) {
+      System.out.println("ASUFIASUFF");
+      diff -= 360;
+      visionRotate.setGoAround(true); 
+      tempAngleForOptimize = getAngle();
+    }
+    if (currentAngle + diff < -Constants.MOTION_RANGE) {
+      System.out.println("74543856345sigujisfjsdfsd");
+      diff += 360;
+      visionRotate.setGoAround(true); 
+      tempAngleForOptimize = getAngle();
+    }
+
+    if (visionRotate.getGoAround()) {
+      if (Math.abs(tempAngleForOptimize - getAngle()) > 180) {
+        visionRotate.setGoAround(false); 
+        tempAngleForOptimize = 0;
+      }
+    }
+
+    return diff + currentAngle;
+  } */
+
   public double optimizeAngle(double wantedAngle) {
     double currentAngle = getAngle(), diff = wantedAngle - getAngle();
     if (wantedAngle > 180)
@@ -114,20 +150,24 @@ public class Turret extends SubsystemBase {
     else if (wantedAngle < -180)
       diff += 360;
 
-    if (currentAngle + diff > Constants.MOTION_RANGE)
+    if (currentAngle + diff > Constants.MOTION_RANGE) {
       diff -= 360;
-    else if (currentAngle + diff < -Constants.MOTION_RANGE)
+    }
+    if (currentAngle + diff < -Constants.MOTION_RANGE) {
       diff += 360;
-      
+    }
+
     return diff + currentAngle;
   }
 
-  // TODO DELETE!!!!!!!!!!!!!!!!!!!!!!! should be in chassis. no use of root`s location in subsystem, only in commands!!!!!!!!!!!!!!!!!!!!
-  public Pose2d getRobotPose(){
-    return utilities.getRobotPose ();
+  // TODO DELETE!!!!!!!!!!!!!!!!!!!!!!! should be in chassis. no use of root`s
+  // location in subsystem, only in commands!!!!!!!!!!!!!!!!!!!!
+  public Pose2d getRobotPose() {
+    return utilities.getRobotPose();
   }
 
-  // TODO BETTER NAMES FOR SENSOR GETTERS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // TODO BETTER NAMES FOR SENSOR GETTERS
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   public boolean getSensorClockWise() {
     return !sensor1.get();
   }
@@ -144,12 +184,12 @@ public class Turret extends SubsystemBase {
     this.mode = mode;
   }
 
-  public void setKP(double newKP){
+  public void setKP(double newKP) {
     kpValue = newKP;
     motor.config_kP(0, kpValue);
   }
 
-  public double getKp(){
+  public double getKp() {
     return kpValue;
   }
 
@@ -169,8 +209,8 @@ public class Turret extends SubsystemBase {
       case SIDE:
         periodicSide();
     }
-      //ffsearch2 = SmartDashboard.getNumber("REALGETFF", 0.0);
-      //setPower(ffsearch2);
+    // ffsearch2 = SmartDashboard.getNumber("REALGETFF", 0.0);
+    // setPower(ffsearch2);
   }
 
   private void checkLimit() {
@@ -189,7 +229,7 @@ public class Turret extends SubsystemBase {
     Shuffleboard.getTab("title").add(this);
   }
 
-  public void setVelocity(double vel){
+  public void setVelocity(double vel) {
     motor.set(ControlMode.Velocity, vel);
   }
 
@@ -197,23 +237,21 @@ public class Turret extends SubsystemBase {
     // set motor to break
   }
 
-  public double getFfValue(){
+  public double getFfValue() {
     return Constants.TURRET_MOTOR_KP;
   }
 
-  public void setff(double newff){
+  public void setff(double newff) {
     ff = newff;
   }
 
-  public void setFfSearch(double newff){
-   // ffsearch = newff;
+  public void setFfSearch(double newff) {
+    // ffsearch = newff;
   }
 
-  public double getFfSearch(){
+  public double getFfSearch() {
     return ffsearch;
   }
-
-  
 
   @Override
   public void initSendable(SendableBuilder builder) {

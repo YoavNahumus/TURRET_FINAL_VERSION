@@ -31,6 +31,6 @@ public final class Constants {
     public static final int MOTION_RANGE = 190;
     public static final double SENSOR_ACIVATE_VALUE = -1;
     public static final double MIN_POWER_FOR_MOVEMENT = 0;
-    public static double FF_VALUE = 0.039099;
-    public static final double TURRET_MOTOR_KP = 0.03;
+    public static double FF_VALUE = 0.028;
+    public static final double TURRET_MOTOR_KP = 0.04;
 }

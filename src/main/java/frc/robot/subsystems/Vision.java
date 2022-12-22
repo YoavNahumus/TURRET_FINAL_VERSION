@@ -26,8 +26,10 @@ public class Vision extends SubsystemBase {
 
 
   public boolean validTarget() {
-    return tv.getDouble(0) != 0;
+    return tv.getBoolean(false);
   }
+
+  
   
   public double targetXAngle() {
     if(validTarget()) {
@@ -46,6 +48,5 @@ public class Vision extends SubsystemBase {
   @Override
   public void periodic() {
     //System.out.println(targetXAngle());
-    System.out.println(validTarget());
   }
 }

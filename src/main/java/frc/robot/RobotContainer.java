@@ -36,10 +36,10 @@ public class RobotContainer {
     joystick = new Joystick(Constants.JOYSTICK_ID);
     turret = new Turret(this);
      find = new FindFF(turret);
+     VisionRotate visrot = new VisionRotate(turret, vis);
     Shuffleboard.getTab("FIND").add(find);
-    configureButtonBindings();
-    Vision vision = new Vision();
-    turret.setDefaultCommand(new VisionRotate(turret, vis));
+    Shuffleboard.getTab("vis").add(visrot);
+    turret.setDefaultCommand(visrot);
     //turret.setDefaultCommand(new ControlWithJoystick(turret, joystick));
   }
 

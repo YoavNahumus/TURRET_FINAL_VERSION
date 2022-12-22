@@ -77,7 +77,8 @@ System.out.println(turret.getSensorClockWise());
   @Override
   public void end(boolean interrupted) {
     System.out.println(turret.getAngle());
-    turret.setAngle(turret.optimizeAngle(0));
+    boolean idk = false;
+   // turret.setAngle(turret.optimizeAngle(0, idk));
     System.out.println("END");
   }
 

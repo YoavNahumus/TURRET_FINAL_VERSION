@@ -11,7 +11,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Turret;
 
-public class AimToXY extends CommandBase {
+public class OdometryAim extends CommandBase {
   private final Turret turret;
   private final Translation2d targetxy;
   private Rotation2d currentRobotHeading;
@@ -21,9 +21,9 @@ public class AimToXY extends CommandBase {
   private double tempX;
   private double tempY;
   private double angleToGo;
-  private Pose2d currentRobotPose;
+  private Pose2d currentRobotPose = new Pose2d(new Translation2d(1,2), new Rotation2d(8));
   /** Creates a new AimToXY. */
-  public AimToXY(Turret turret, Translation2d targetxy) {
+  public OdometryAim(Turret turret, Translation2d targetxy) {
     this.turret = turret;
     this.targetxy = targetxy;
     addRequirements(turret);
@@ -38,13 +38,14 @@ public class AimToXY extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // currentRobotPose = turret.getRobotPose();
-    // tempX = currentRobotPose.getX()-targetxy.getX();
-    // tempY = currentRobotPose.getY()-targetxy.getY();
-    // robotToTargetXY = new Translation2d(tempX,tempY);
-    // robotToTargetRotation = new Rotation2d(robotToTargetXY.getX(), robotToTargetXY.getY());
-    // angleToGo = robotToTargetRotation.minus(currentRobotPose.getRotation()).getDegrees();
-    // turret.setAngle(angleToGo);
+    currentRobotPose = turret.getRobotPose();
+    tempX = currentRobotPose.getX()-
+    this.targetxy.getX();
+    tempY = currentRobotPose.getY()-this.targetxy.getY();
+    robotToTargetXY = new Translation2d(tempX,tempY);
+    robotToTargetRotation = new Rotation2d(robotToTargetXY.getX(), robotToTargetXY.getY());
+    angleToGo = robotToTargetRotation.minus(currentRobotPose.getRotation()).getDegrees();
+   // turret.setAngle(angleToGo);
   }
 
   
