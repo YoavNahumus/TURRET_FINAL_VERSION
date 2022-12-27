@@ -48,12 +48,10 @@ public class VisionRotate extends CommandBase {
   }
 
 
+
   public double optimizeAngleForVision(double wantedAngle) {
     double currentAngle = turret.getAngle();
-    if (wantedAngle > 180)
-      wantedAngle -= 360;
-    else if (wantedAngle < -180)
-      wantedAngle += 360;
+     wantedAngle = wantedAngle % 360;
 
       double diff = wantedAngle - turret.getAngle();
     if (currentAngle + diff > Constants.MOTION_RANGE) {
