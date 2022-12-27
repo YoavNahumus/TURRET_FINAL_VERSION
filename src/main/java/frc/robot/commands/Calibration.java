@@ -25,7 +25,7 @@ public class Calibration extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    turret.setPower(0.4);
+    turret.setPower(0.35);
     nPeriods = 0;
     mode = modeEnum.Fast;
     passedsensor = false;
@@ -78,7 +78,7 @@ System.out.println(turret.getSensorClockWise());
   public void end(boolean interrupted) {
     System.out.println(turret.getAngle());
     boolean idk = false;
-   // turret.setAngle(turret.optimizeAngle(0, idk));
+    turret.setAngle(0);
     System.out.println("END");
   }
 

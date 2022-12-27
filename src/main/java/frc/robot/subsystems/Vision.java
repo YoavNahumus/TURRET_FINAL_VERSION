@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -31,12 +32,8 @@ public class Vision extends SubsystemBase {
 
   
   
-  public double targetXAngle() {
-    if(validTarget()) {
-      return tx.getDouble(198);
-    }else{
-     return 180;
-    }
+  public Pair<Double, Boolean> targetXAngle() {
+    return new Pair<>(tx.getDouble(198), validTarget());
   }
   public double targetYAngle() {
     if(validTarget()) {

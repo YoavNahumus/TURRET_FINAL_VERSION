@@ -34,7 +34,7 @@ public class VisionRotate extends CommandBase {
   @Override
   public void execute() {
     if (vision.validTarget()){
-      sp = turret.getAngle() + vision.targetXAngle()-turret.getAngle()%0.1;
+     // sp = turret.getAngle() + vision.targetXAngle()-turret.getAngle()%0.1;
     }
     sp = optimizeAngleForVision(sp);
     if(!goAround){
@@ -59,20 +59,27 @@ public class VisionRotate extends CommandBase {
       diff -= 360;
       setGoAround(true); 
       tempAngleForOptimize = turret.getAngle();
+      turret.setAngle(diff + currentAngle) ;
     }
     if (currentAngle + diff < -Constants.MOTION_RANGE) {
       System.out.println("BIGGER --------");
       diff += 360;
       setGoAround(true); 
       tempAngleForOptimize = turret.getAngle();
+      turret.setAngle(diff + currentAngle) ;
     }
 
     if (getGoAround()) {
-      if (Math.abs(tempAngleForOptimize - turret.getAngle()) > 180) {
-        setGoAround(false); 
+      double mytemp = turret.getAngle() - (tempAngleForOptimize);
+      if ( mytemp >=180 && vision.validTarget()) {
+        goAround = false; 
+        System.out.println("NOW ITS FALSE 374393932");
         tempAngleForOptimize = 0;
       }
     }
+
+    System.out.println(Math.abs(turret.getAngle()) + " AND TEMP ANGE IS: " + Math.abs(tempAngleForOptimize));
+    //System.out.println("E");
     return diff + currentAngle;
   }
 
